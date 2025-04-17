@@ -190,7 +190,7 @@ function showResults() {
 
     // Determine risk level based on overall score
     const likelihood = overallScore >= 90 ? 1 : overallScore >= 70 ? 2 : overallScore >= 50 ? 3 : overallScore >= 30 ? 4 : 5;
-    const impact = 3; // Default impact level (moderate)
+    const impact = overallScore >= 70 ? 3 : overallScore >= 30 ? 4 : 5; // Impact increases with lower scores
 
     // Highlight the risk cell
     const riskScore = likelihood * impact;
