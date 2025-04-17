@@ -9,6 +9,41 @@
 </head>
 <body>
     <div class="container">
+        <div id="org-context" class="section active">
+            <h2>Organization Context</h2>
+            <form id="org-context-form">
+                <div class="question">
+                    <label for="org_sector">Sector:</label>
+                    <select id="org_sector" required>
+                        <option value="general">General</option>
+                        <option value="healthcare">Healthcare</option>
+                        <option value="finance">Finance</option>
+                        <option value="government">Government</option>
+                        <option value="critical">Critical Infrastructure</option>
+                    </select>
+                </div>
+                <div class="question">
+                    <label for="org_size">Organization Size:</label>
+                    <select id="org_size" required>
+                        <option value="micro">Micro (1-9 employees)</option>
+                        <option value="small">Small (10-49 employees)</option>
+                        <option value="medium">Medium (50-249 employees)</option>
+                        <option value="large">Large (250+ employees)</option>
+                    </select>
+                </div>
+                <div class="question">
+                    <label for="org_impact">Impact Level:</label>
+                    <select id="org_impact" required>
+                        <option value="1">Low</option>
+                        <option value="2">Medium-Low</option>
+                        <option value="3">Medium</option>
+                        <option value="4">Medium-High</option>
+                        <option value="5">High</option>
+                    </select>
+                </div>
+                <button type="submit">Start Assessment</button>
+            </form>
+        </div>
         <header>
             <h1>Cyber Essentials Self-Assessment</h1>
             <p>This tool will help you assess your organisation's compliance with Cyber Essentials requirements.</p>
