@@ -1,7 +1,13 @@
-
 // Define total number of sections
 const totalSections = 5;
 let currentSection = 1;
+
+// Organization context (to be populated by user input)
+let organizationContext = {
+    sector: 'general',
+    sizeCategory: 'medium',
+    impactLevel: 3
+};
 
 // Update progress bar
 function updateProgress() {
@@ -162,7 +168,7 @@ function showResults() {
 
     sectionScores.forEach(section => {
         const status = calculateComplianceStatus(section.score);
-        const statusClass = status === 'Compliant' ? 'status-compliant' : 
+        const statusClass = status === 'Compliant' ? 'status-compliant' :
                            status === 'Partially Compliant' ? 'status-partial' : 'status-non-compliant';
 
         const row = document.createElement('tr');
@@ -176,7 +182,7 @@ function showResults() {
 
     // Add overall row
     const overallStatus = calculateComplianceStatus(overallScore);
-    const overallStatusClass = overallStatus === 'Compliant' ? 'status-compliant' : 
+    const overallStatusClass = overallStatus === 'Compliant' ? 'status-compliant' :
                               overallStatus === 'Partially Compliant' ? 'status-partial' : 'status-non-compliant';
 
     const overallRow = document.createElement('tr');
@@ -323,6 +329,172 @@ function generateRecommendations() {
     if (!hasRecommendations) {
         recommendationsDiv.innerHTML = '<p>Great job! Your organization appears to be meeting most of the Cyber Essentials requirements. Continue to monitor and maintain your security controls.</p>';
     }
+
+    // Generate action plan
+    generateActionPlan();
+}
+
+// Generate action plan
+function generateActionPlan() {
+    const actionPlanDiv = document.createElement('div');
+    actionPlanDiv.id = 'action-plan';
+    actionPlanDiv.innerHTML = '<h3>Action Plan</h3>';
+
+    const criticalFailures = [];
+    const dangerousCombinations = [];
+    const allIssues = [];
+
+    // Identify critical failures (priority 1)
+    const criticalQuestions = ['q1_1', 'q1_3', 'q2_2', 'q3_4', 'q4_2', 'q4_4', 'q5_1', 'q5_3'];
+
+    criticalQuestions.forEach(questionId => {
+        const radioButton = document.querySelector(`input[name="${questionId}"]:checked`);
+        if (radioButton && radioButton.value === 'no') {
+            const questionText = document.querySelector(`input[name="${questionId}"]`).closest('.question').querySelector('label').textContent;
+            criticalFailures.push({ question: questionId, text: questionText });
+        }
+    });
+
+    // Identify dangerous combinations (priority 2)
+    // Example:  If q1_1 is NO and q1_3 is NO, this is a dangerous combination
+    // Add your logic here to identify dangerous combinations based on answered questions
+
+    // Add critical failures to allIssues
+    criticalFailures.forEach(failure => {
+        allIssues.push({
+            priority: 1,
+            type: 'Critical Control',
+            description: failure.text,
+            recommendation: allRecommendations[failure.question]
+        });
+    });
+
+    // Add dangerous combinations (high priority)
+    dangerousCombinations.forEach(combination => {
+        allIssues.push({
+            priority: 2,
+            type: 'Control Combination',
+            description: combination.name,
+            recommendation: combination.description
+        });
+    });
+
+    // Add other non-compliant controls
+    const processedQuestions = new Set(criticalFailures.map(f => f.question));
+
+    for (const [questionId, recommendation] of Object.entries(allRecommendations)) {
+        if (processedQuestions.has(questionId)) continue;
+
+        const radioButton = document.querySelector(`input[name="${questionId}"]:checked`);
+        if (radioButton && radioButton.value === 'no') {
+            const questionText = document.querySelector(`input[name="${questionId}"]`).closest('.question').querySelector('label').textContent;
+            allIssues.push({
+                priority: 3,
+                type: 'Non-Compliant Control',
+                description: questionText,
+                recommendation: recommendation
+            });
+        }
+    }
+
+    // Sort issues by priority
+    allIssues.sort((a, b) => a.priority - b.priority);
+
+    // Generate timeline estimates based on organization size
+    const timelineEstimates = {
+        'micro': { short: '1-2 weeks', medium: '2-4 weeks', long: '1-2 months' },
+        'small': { short: '2-3 weeks', medium: '1-2 months', long: '2-3 months' },
+        'medium': { short: '3-4 weeks', medium: '2-3 months', long: '3-6 months' },
+        'large': { short: '1-2 months', medium: '3-6 months', long: '6-12 months' }
+    };
+
+    const timeline = timelineEstimates[organizationContext.sizeCategory];
+
+    // Create action plan table
+    const table = document.createElement('table');
+    table.classList.add('action-plan-table');
+    table.innerHTML = `
+        <thead>
+            <tr>
+                <th>Priority</th>
+                <th>Type</th>
+                <th>Issue</th>
+                <th>Recommendation</th>
+                <th>Estimated Timeline</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    `;
+
+    allIssues.forEach((issue, index) => {
+        const row = document.createElement('tr');
+        const timelineEstimate = issue.priority === 1 ? timeline.short :
+                                issue.priority === 2 ? timeline.medium :
+                                timeline.long;
+
+        row.innerHTML = `
+            <td>${index + 1}</td>
+            <td>${issue.type}</td>
+            <td>${issue.description}</td>
+            <td>${issue.recommendation}</td>
+            <td>${timelineEstimate}</td>
+        `;
+
+        table.querySelector('tbody').appendChild(row);
+    });
+
+    actionPlanDiv.appendChild(table);
+
+    // Add action plan to recommendations
+    document.getElementById('recommendations').appendChild(actionPlanDiv);
+}
+
+// Get sector-specific advice
+function getSectorSpecificAdvice(questionId, sector) {
+    const sectorAdvice = {
+        'healthcare': {
+            'q4_2': 'Ensure compliance with HIPAA requirements for user authentication and access controls.',
+            'q4_4': 'Consider implementing biometric authentication for sensitive areas.',
+            'q5_1': 'Deploy specialized healthcare-focused malware protection that understands DICOM and HL7 protocols.'
+        },
+        'finance': {
+            'q1_1': 'Implement financial services-grade firewalls with deep packet inspection capabilities.',
+            'q1_3': 'Consider implementing privileged access management (PAM) solutions.',
+            'q4_4': 'Ensure compliance with financial regulations regarding multi-factor authentication.'
+        },
+        'government': {
+            'q1_3': 'Follow relevant government frameworks for administrative access control.',
+            'q2_2': 'Implement password policies aligned with government security standards.',
+            'q4_2': 'Consider implementing PIV/CAC card authentication where appropriate.'
+        },
+        'critical': {
+            'q1_1': 'Implement industrial firewall solutions that understand ICS/SCADA protocols.',
+            'q3_4': 'Establish an emergency patching procedure for critical vulnerabilities.',
+            'q5_1': 'Deploy specialized ICS/SCADA-aware malware protection.'
+        }
+    };
+
+    return sectorAdvice[sector]?.[questionId] || null;
+}
+
+// Load organization context form
+function loadOrgContextForm() {
+    const orgContextForm = document.getElementById('org-context-form');
+    orgContextForm.addEventListener('submit', function(event) {
+        event.preventDefault();
+
+        organizationContext.sector = document.getElementById('org_sector').value;
+        organizationContext.sizeCategory = document.getElementById('org_size').value;
+        organizationContext.impactLevel = parseInt(document.getElementById('org_impact').value, 10);
+
+        // Hide organization context section and show first section
+        document.getElementById('org-context').classList.remove('active');
+        document.getElementById('section-1').classList.add('active');
+
+        // Update current section and progress
+        currentSection = 1;
+        updateProgress();
+    });
 }
 
 // Reset the quiz
@@ -332,14 +504,26 @@ function resetQuiz() {
         radio.checked = false;
     });
 
+    // Clear all selected dropdowns in organization context
+    document.getElementById('org_sector').value = 'general';
+    document.getElementById('org_size').value = 'medium';
+    document.getElementById('org_impact').value = '3';
+
+    // Reset organization context
+    organizationContext = {
+        sector: 'general',
+        sizeCategory: 'medium',
+        impactLevel: 3
+    };
+
     // Hide results section
     document.getElementById('results').style.display = 'none';
 
-    // Show first section
+    // Show organization context section
     document.querySelectorAll('.section').forEach(section => {
         section.classList.remove('active');
     });
-    document.getElementById('section-1').classList.add('active');
+    document.getElementById('org-context').classList.add('active');
 
     // Reset progress bar
     document.getElementById('progress').style.width = '0%';
@@ -348,5 +532,6 @@ function resetQuiz() {
     currentSection = 1;
 }
 
-// Initialize progress bar
+// Initialize progress bar and load organization context form
 updateProgress();
+loadOrgContextForm();
