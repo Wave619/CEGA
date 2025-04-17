@@ -1,16 +1,1023 @@
 <!DOCTYPE html>
-<html>
-
+<html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width">
-  <title>replit</title>
-  <link href="style.css" rel="stylesheet" type="text/css" />
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cyber Essentials Gap Analysis</title>
+    <style>
+        :root {
+            --primary-color: #0066cc;
+            --secondary-color: #004c99;
+            --light-gray: #f5f5f5;
+            --medium-gray: #e0e0e0;
+            --dark-gray: #333;
+            --danger: #dc3545;
+            --warning: #ffc107;
+            --success: #28a745;
+            --info: #17a2b8;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            line-height: 1.6;
+            color: var(--dark-gray);
+            background-color: var(--light-gray);
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+        h2 {
+            color: var(--secondary-color);
+            margin: 20px 0 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--medium-gray);
+        }
+
+        .section {
+            margin-bottom: 30px;
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        .question {
+            background-color: var(--light-gray);
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+        }
+
+        .question label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+
+        .options {
+            display: flex;
+            gap: 15px;
+        }
+
+        .options label {
+            display: flex;
+            align-items: center;
+            font-weight: normal;
+            cursor: pointer;
+        }
+
+        input[type="radio"] {
+            margin-right: 5px;
+        }
+
+        .buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 20px;
+        }
+
+        button {
+            padding: 10px 20px;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        button:hover {
+            background-color: var(--secondary-color);
+        }
+
+        button.prev {
+            background-color: var(--dark-gray);
+        }
+
+        button.prev:hover {
+            background-color: black;
+        }
+
+        #progress-bar {
+            height: 10px;
+            background-color: var(--medium-gray);
+            border-radius: 5px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+
+        #progress {
+            height: 100%;
+            background-color: var(--primary-color);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        #results {
+            display: none;
+        }
+
+        .risk-matrix {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        .risk-matrix th, .risk-matrix td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: center;
+        }
+
+        .risk-matrix th {
+            background-color: var(--secondary-color);
+            color: white;
+        }
+
+        .risk-level-critical {
+            background-color: var(--danger);
+            color: white;
+        }
+
+        .risk-level-high {
+            background-color: #ff9800;
+            color: white;
+        }
+
+        .risk-level-medium {
+            background-color: var(--warning);
+        }
+
+        .risk-level-low {
+            background-color: var(--success);
+            color: white;
+        }
+
+        .results-section {
+            margin-bottom: 20px;
+        }
+
+        .recommendation {
+            background-color: var(--light-gray);
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 10px;
+        }
+
+        .status-indicator {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+
+        .status-compliant {
+            background-color: var(--success);
+        }
+
+        .status-partial {
+            background-color: var(--warning);
+        }
+
+        .status-non-compliant {
+            background-color: var(--danger);
+        }
+
+        #summary-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        #summary-table th, #summary-table td {
+            border: 1px solid #ddd;
+            padding: 12px;
+        }
+
+        #summary-table th {
+            background-color: var(--secondary-color);
+            color: white;
+            text-align: left;
+        }
+
+        #summary-table td:first-child {
+            width: 60%;
+        }
+
+        .print-btn {
+            background-color: var(--info);
+            margin-top: 20px;
+        }
+
+        .print-btn:hover {
+            background-color: #138496;
+        }
+
+        @media print {
+            .no-print {
+                display: none;
+            }
+
+            body {
+                background-color: white;
+                padding: 0;
+            }
+
+            .container {
+                box-shadow: none;
+                padding: 0;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 15px;
+            }
+
+            .options {
+                flex-direction: column;
+                gap: 5px;
+            }
+        }
+    </style>
 </head>
-
 <body>
-  Hello world
-  <script src="script.js"></script>
-</body>
+    <div class="container">
+        <header>
+            <h1>Cyber Essentials Gap Analysis</h1>
+            <p>Assess your organization's compliance with the Cyber Essentials requirements</p>
+        </header>
 
-</html>
+        <div id="progress-bar">
+            <div id="progress"></div>
+        </div>
+
+        <!-- Firewalls Section -->
+        <div class="section active" id="section-1">
+            <h2>1. Firewalls</h2>
+
+            <div class="question">
+                <label>1.1 Do you have firewalls (or network devices with firewall functionality) protecting every device within scope?</label>
+                <div class="options">
+                    <label><input type="radio" name="q1_1" value="yes"> Yes</label>
+                    <label><input type="radio" name="q1_1" value="partial"> Partially</label>
+                    <label><input type="radio" name="q1_1" value="no"> No</label>
+                </div>
+            </div>
+
+            <div class="question">
+                <label>1.2 Have default administrative passwords been changed to strong and unique passwords (or remote administrative access been disabled)?</label>
+                <div class="options">
+                    <label><input type="radio" name="q1_2" value="yes"> Yes</label>
+                    <label><input type="radio" name="q1_2" value="partial"> Partially</label>
+                    <label><input type="radio" name="q1_2" value="no"> No</label>
+                </div>
+            </div>
+
+            <div class="question">
+                <label>1.3 Is administrative interface access from the internet either prevented or appropriately protected with MFA or IP allow listing?</label>
+                <div class="options">
+                    <label><input type="radio" name="q1_3" value="yes"> Yes</label>
+                    <label><input type="radio" name="q1_3" value="partial"> Partially</label>
+                    <label><input type="radio" name="q1_3" value="no"> No</label>
+                </div>
+            </div>
+
+            <div class="question">
+                <label>1.4 Are inbound connections blocked by default and are approved inbound firewall rules documented with business justification?</label>
+                <div class="options">
+                    <label><input type="radio" name="q1_4" value="yes"> Yes</label>
+                    <label><input type="radio" name="q1_4" value="partial"> Partially</label>
+                    <label><input type="radio" name="q1_4" value="no"> No</label>
+                </div>
+            </div>
+
+            <div class="question">
+                <label>1.5 Are software firewalls used on devices that connect to untrusted networks (like public WiFi)?</label>
+                <div class="options">
+                    <label><input type="radio" name="q1_5" value="yes"> Yes</label>
+                    <label><input type="radio" name="q1_5" value="partial"> Partially</label>
+                    <label><input type="radio" name="q1_5" value="no"> No</label>
+                </div>
+            </div>
+
+            <div class="buttons">
+                <div></div> <!-- Empty div for spacing -->
+                <button class="next" onclick="nextSection(1)">Next</button>
+            </div>
+        </div>
+
+        <!-- Secure Configuration Section -->
+        <div class="section" id="section-2">
+            <h2>2. Secure Configuration</h2>
+
+            <div class="question">
+                <label>2.1 Are unnecessary user accounts (including guest accounts and unused administrative accounts) regularly removed or disabled?</label>
+                <div class="options">
+                    <label><input type="radio" name="q2_1" value="yes"> Yes</label>
+                    <label><input type="radio" name="q2_1" value="partial"> Partially</label>
+                    <label><input type="radio" name="q2_1" value="no"> No</label>
+                </div>
+            </div>
+
+            <div class="question">
+                <label>2.2 Have all default or easily guessable account passwords been changed?</label>
+                <div class="options">
+                    <label><input type="radio" name="q2_2" value="yes"> Yes</label>
+                    <label><input type="radio" name="q2_2" value="partial"> Partially</label>
+                    <label><input type="radio" name="q2_2" value="no"> No</label>
+                </div>
+            </div>
+
+            <div class="question">
+                <label>2.3 Has unnecessary software (including applications, system utilities, and network services) been removed or disabled?</label>
+                <div class="options">
+                    <label><input type="radio" name="q2_3" value="yes"> Yes</label>
+                    <label><input type="radio" name="q2_3" value="partial"> Partially</label>
+                    <label><input type="radio" name="q2_3" value="no"> No</label>
+                </div>
+            </div>
+
+            <div class="question">
+                <label>2.4 Are auto-run features that allow file execution without user authorization disabled across your systems?</label>
+                <div class="options">
+                    <label><input type="radio" name="q2_4" value="yes"> Yes</label>
+                    <label><input type="radio" name="q2_4" value="partial"> Partially</label>
+                    <label><input type="radio" name="q2_4" value="no"> No</label>
+                </div>
+            </div>
+
+            <div class="question">
+                <label>2.5 Are appropriate device locking controls (such as password, PIN, or biometric) implemented for all devices requiring physical presence?</label>
+                <div class="options">
+                    <label><input type="radio" name="q2_5" value="yes"> Yes</label>
+                    <label><input type="radio" name="q2_5" value="partial"> Partially</label>
+                    <label><input type="radio" name="q2_5" value="no"> No</label>
+                </div>
+            </div>
+
+            <div class="buttons">
+                <button class="prev" onclick="prevSection(2)">Previous</button>
+                <button class="next" onclick="nextSection(2)">Next</button>
+            </div>
+        </div>
+
+        <!-- Security Update Management Section -->
+        <div class="section" id="section-3">
+            <h2>3. Security Update Management</h2>
+
+            <div class="question">
+                <label>3.1 Is all software within scope licensed and supported?</label>
+                <div class="options">
+                    <label><input type="radio" name="q3_1" value="yes"> Yes</label>
+                    <label><input type="radio" name="q3_1" value="partial"> Partially</label>
+                    <label><input type="radio" name="q3_1" value="no"> No</label>
+                </div>
+            </div>
+
+            <div class="question">
+                <label>3.2 Has unsupported software been removed from devices or isolated from internet access?</label>
+                <div class="options">
+                    <label><input type="radio" name="q3_2" value="yes"> Yes</label>
+                    <label><input type="radio" name="q3_2" value="partial"> Partially</label>
+                    <label><input type="radio" name="q3_2" value="no"> No</label>
+                </div>
+            </div>
+
+            <div class="question">
+                <label>3.3 Are automatic updates enabled where possible for all software?</label>
+                <div class="options">
+                    <label><input type="radio" name="q3_3" value="yes"> Yes</label>
+                    <label><input type="radio" name="q3_3" value="partial"> Partially</label>
+                    <label><input type="radio" name="q3_3" value="no"> No</label>
+                </div>
+            </div>
+
+            <div class="question">
+                <label>3.4 Are high-risk or critical security updates applied within 14 days of release?</label>
+                <div class="options">
+                    <label><input type="radio" name="q3_4" value="yes"> Yes</label>
+                    <label><input type="radio" name="q3_4" value="partial"> Partially</label>
+                    <label><input type="radio" name="q3_4" value="no"> No</label>
+                </div>
+            </div>
+
+            <div class="question">
+                <label>3.5 Are manual configuration changes to fix vulnerabilities implemented within 14 days where patch updates are not available?</label>
+                <div class="options">
+                    <label><input type="radio" name="q3_5" value="yes"> Yes</label>
+                    <label><input type="radio" name="q3_5" value="partial"> Partially</label>
+                    <label><input type="radio" name="q3_5" value="no"> No</label>
+                </div>
+            </div>
+
+            <div class="buttons">
+                <button class="prev" onclick="prevSection(3)">Previous</button>
+                <button class="next" onclick="nextSection(3)">Next</button>
+            </div>
+        </div>
+
+        <!-- User Access Control Section -->
+        <div class="section" id="section-4">
+            <h2>4. User Access Control</h2>
+
+            <div class="question">
+                <label>4.1 Do you have a process to create and approve user accounts?</label>
+                <div class="options">
+                    <label><input type="radio" name="q4_1" value="yes"> Yes</label>
+                    <label><input type="radio" name="q4_1" value="partial"> Partially</label>
+                    <label><input type="radio" name="q4_1" value="no"> No</label>
+                </div>
+            </div>
+
+            <div class="question">
+                <label>4.2 Are users authenticated with unique credentials before granting access to applications or devices?</label>
+                <div class="options">
+                    <label><input type="radio" name="q4_2" value="yes"> Yes</label>
+                    <label><input type="radio" name="q4_2" value="partial"> Partially</label>
+                    <label><input type="radio" name="q4_2" value="no"> No</label>
+                </div>
+            </div>
+
+            <div class="question">
+                <label>4.3 Are user accounts removed or disabled when no longer required (e.g., when a user leaves the organization)?</label>
+                <div class="options">
+                    <label><input type="radio" name="q4_3" value="yes"> Yes</label>
+                    <label><input type="radio" name="q4_3" value="partial"> Partially</label>
+                    <label><input type="radio" name="q4_3" value="no"> No</label>
+                </div>
+            </div>
+
+            <div class="question">
+                <label>4.4 Is multi-factor authentication (MFA) implemented where available, especially for cloud services and administrative access?</label>
+                <div class="options">
+                    <label><input type="radio" name="q4_4" value="yes"> Yes</label>
+                    <label><input type="radio" name="q4_4" value="partial"> Partially</label>
+                    <label><input type="radio" name="q4_4" value="no"> No</label>
+                </div>
+            </div>
+
+            <div class="question">
+                <label>4.5 Are separate accounts used for administrative activities with no standard user activities (email, web browsing) performed on these accounts?</label>
+                <div class="options">
+                    <label><input type="radio" name="q4_5" value="yes"> Yes</label>
+                    <label><input type="radio" name="q4_5" value="partial"> Partially</label>
+                    <label><input type="radio" name="q4_5" value="no"> No</label>
+                </div>
+            </div>
+
+            <div class="question">
+                <label>4.6 Do your passwords meet the technical requirements (minimum of 8 characters if using MFA or 12 without MFA) with no maximum length restriction?</label>
+                <div class="options">
+                    <label><input type="radio" name="q4_6" value="yes"> Yes</label>
+                    <label><input type="radio" name="q4_6" value="partial"> Partially</label>
+                    <label><input type="radio" name="q4_6" value="no"> No</label>
+                </div>
+            </div>
+
+            <div class="buttons">
+                <button class="prev" onclick="prevSection(4)">Previous</button>
+                <button class="next" onclick="nextSection(4)">Next</button>
+            </div>
+        </div>
+
+        <!-- Malware Protection Section -->
+        <div class="section" id="section-5">
+            <h2>5. Malware Protection</h2>
+
+            <div class="question">
+                <label>5.1 Is malware protection active on all devices within scope?</label>
+                <div class="options">
+                    <label><input type="radio" name="q5_1" value="yes"> Yes</label>
+                    <label><input type="radio" name="q5_1" value="partial"> Partially</label>
+                    <label><input type="radio" name="q5_1" value="no"> No</label>
+                </div>
+            </div>
+
+            <div class="question">
+                <label>5.2 Is your anti-malware software configured to be updated in line with vendor recommendations?</label>
+                <div class="options">
+                    <label><input type="radio" name="q5_2" value="yes"> Yes</label>
+                    <label><input type="radio" name="q5_2" value="partial"> Partially</label>
+                    <label><input type="radio" name="q5_2" value="no"> No</label>
+                </div>
+            </div>
+
+            <div class="question">
+                <label>5.3 Is your anti-malware solution configured to prevent malware from running and prevent malicious code execution?</label>
+                <div class="options">
+                    <label><input type="radio" name="q5_3" value="yes"> Yes</label>
+                    <label><input type="radio" name="q5_3" value="partial"> Partially</label>
+                    <label><input type="radio" name="q5_3" value="no"> No</label>
+                </div>
+            </div>
+
+            <div class="question">
+                <label>5.4 Is your anti-malware solution configured to prevent connections to malicious websites over the internet?</label>
+                <div class="options">
+                    <label><input type="radio" name="q5_4" value="yes"> Yes</label>
+                    <label><input type="radio" name="q5_4" value="partial"> Partially</label>
+                    <label><input type="radio" name="q5_4" value="no"> No</label>
+                </div>
+            </div>
+
+            <div class="question">
+                <label>5.5 If using application allow listing, do you actively approve applications before deployment and maintain a current list of approved applications?</label>
+                <div class="options">
+                    <label><input type="radio" name="q5_5" value="yes"> Yes</label>
+                    <label><input type="radio" name="q5_5" value="partial"> Partially</label>
+                    <label><input type="radio" name="q5_5" value="no"> No</label>
+                    <label><input type="radio" name="q5_5" value="na"> Not Applicable</label>
+                </div>
+            </div>
+
+            <div class="buttons">
+                <button class="prev" onclick="prevSection(5)">Previous</button>
+                <button class="next" onclick="showResults()">Generate Results</button>
+            </div>
+        </div>
+
+        <!-- Results Section -->
+        <div id="results">
+            <h2>Cyber Essentials Gap Analysis Results</h2>
+
+            <div class="results-section">
+                <h3>Summary of Compliance</h3>
+                <table id="summary-table">
+                    <thead>
+                        <tr>
+                            <th>Control Category</th>
+                            <th>Status</th>
+                            <th>Score</th>
+                        </tr>
+                    </thead>
+                    <tbody id="summary-body">
+                        <!-- Will be populated by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="results-section">
+                <h3>Risk Matrix</h3>
+                <p>Based on your answers, here is your organization's risk assessment:</p>
+
+                <table class="risk-matrix">
+                    <thead>
+                        <tr>
+                            <th colspan="2" rowspan="2"></th>
+                            <th colspan="5">IMPACT</th>
+                        </tr>
+                        <tr>
+                            <th>Insignificant<br>1</th>
+                            <th>Minor<br>2</th>
+                            <th>Moderate<br>3</th>
+                            <th>Major<br>4</th>
+                            <th>Catastrophic<br>5</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <th rowspan="5">LIKELIHOOD</th>
+                            <th>Highly Probable<br>5</th>
+                            <td class="risk-level-medium" id="cell-5-1">5</td>
+                            <td class="risk-level-medium" id="cell-5-2">10</td>
+                            <td class="risk-level-high" id="cell-5-3">15</td>
+                            <td class="risk-level-critical" id="cell-5-4">20</td>
+                            <td class="risk-level-critical" id="cell-5-5">25</td>
+                        </tr>
+                        <tr>
+                            <th>Probable<br>4</th>
+                            <td class="risk-level-low" id="cell-4-1">4</td>
+                            <td class="risk-level-medium" id="cell-4-2">8</td>
+                            <td class="risk-level-high" id="cell-4-3">12</td>
+                            <td class="risk-level-high" id="cell-4-4">16</td>
+                            <td class="risk-level-critical" id="cell-4-5">20</td>
+                        </tr>
+                        <tr>
+                            <th>Possible<br>3</th>
+                            <td class="risk-level-low" id="cell-3-1">3</td>
+                            <td class="risk-level-medium" id="cell-3-2">6</td>
+                            <td class="risk-level-medium" id="cell-3-3">9</td>
+                            <td class="risk-level-high" id="cell-3-4">12</td>
+                            <td class="risk-level-high" id="cell-3-5">15</td>
+                        </tr>
+                        <tr>
+                            <th>Unlikely<br>2</th>
+                            <td class="risk-level-low" id="cell-2-1">2</td>
+                            <td class="risk-level-low" id="cell-2-2">4</td>
+                            <td class="risk-level-medium" id="cell-2-3">6</td>
+                            <td class="risk-level-medium" id="cell-2-4">8</td>
+                            <td class="risk-level-medium" id="cell-2-5">10</td>
+                        </tr>
+                        <tr>
+                            <th>Remote<br>1</th>
+                            <td class="risk-level-low" id="cell-1-1">1</td>
+                            <td class="risk-level-low" id="cell-1-2">2</td>
+                            <td class="risk-level-low" id="cell-1-3">3</td>
+                            <td class="risk-level-low" id="cell-1-4">4</td>
+                            <td class="risk-level-medium" id="cell-1-5">5</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div>
+                    <p><strong>Legend:</strong></p>
+                    <ul style="list-style-type: none; margin-top: 5px;">
+                        <li><span class="status-indicator status-non-compliant"></span> Critical Risk (16-25): Immediate action required</li>
+                        <li><span class="status-indicator status-partial"></span> High Risk (11-15): Requires mitigation measures</li>
+                        <li><span class="status-indicator" style="background-color: #ff9800;"></span> Medium Risk (5-10): May be accepted with management approval</li>
+                        <li><span class="status-indicator status-compliant"></span> Low Risk (1-4): Acceptable with monitoring</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="results-section">
+                <h3>Gap Analysis Details</h3>
+                <div id="detailed-results">
+                    <!-- Will be populated by JavaScript -->
+                </div>
+            </div>
+
+            <div class="results-section">
+                <h3>Recommendations</h3>
+                <div id="recommendations">
+                    <!-- Will be populated by JavaScript -->
+                </div>
+            </div>
+
+            <div class="no-print">
+                <button class="print-btn" onclick="window.print()">Print/Save Results</button>
+                <button onclick="resetQuiz()">Start New Assessment</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Define total number of sections
+        const totalSections = 5;
+        let currentSection = 1;
+
+        // Update progress bar
+        function updateProgress() {
+            const progressPercent = ((currentSection - 1) / totalSections) * 100;
+            document.getElementById('progress').style.width = progressPercent + '%';
+        }
+
+        // Navigate to next section
+        function nextSection(sectionNum) {
+            // Check if all questions in current section are answered
+            const currentQuestions = document.querySelectorAll(`#section-${sectionNum} input[type="radio"]`);
+            const questionGroups = {};
+
+            // Group questions by name
+            currentQuestions.forEach(question => {
+                if (!questionGroups[question.name]) {
+                    questionGroups[question.name] = [];
+                }
+                questionGroups[question.name].push(question);
+            });
+
+            // Check if any group has no checked option
+            let allAnswered = true;
+            for (const group in questionGroups) {
+                if (!questionGroups[group].some(q => q.checked)) {
+                    allAnswered = false;
+                    break;
+                }
+            }
+
+            if (!allAnswered) {
+                alert('Please answer all questions in this section before proceeding.');
+                return;
+            }
+
+            // Hide current section
+            document.getElementById(`section-${sectionNum}`).classList.remove('active');
+
+            // Show next section
+            currentSection = sectionNum + 1;
+            document.getElementById(`section-${currentSection}`).classList.add('active');
+
+            // Update progress
+            updateProgress();
+        }
+
+        // Navigate to previous section
+        function prevSection(sectionNum) {
+            // Hide current section
+            document.getElementById(`section-${sectionNum}`).classList.remove('active');
+
+            // Show previous section
+            currentSection = sectionNum - 1;
+            document.getElementById(`section-${currentSection}`).classList.add('active');
+
+            // Update progress
+            updateProgress();
+        }
+
+// Calculate section score
+function calculateSectionScore(sectionNum) {
+    const questions = document.querySelectorAll(`#section-${sectionNum} input[type="radio"]:checked`);
+    let scoreTotal = 0;
+    let scoreCount = 0;
+
+    questions.forEach(question => {
+        if (question.value === 'na') return; // Skip N/A answers
+
+        if (question.value === 'yes') {
+            scoreTotal += 1;
+        } else if (question.value === 'partial') {
+            scoreTotal += 0.5;
+        } // 'no' scores 0
+
+        scoreCount++;
+    });
+
+    // Return percentage score if there are answered questions, otherwise 0
+    return scoreCount > 0 ? (scoreTotal / scoreCount) * 100 : 0;
+}
+
+// Calculate overall compliance and determine risk level
+function calculateComplianceStatus(score) {
+    if (score >= 90) {
+        return 'Compliant';
+    } else if (score >= 70) {
+        return 'Partially Compliant';
+    } else {
+        return 'Non-Compliant';
+    }
+}
+
+// Show results after completing the assessment
+function showResults() {
+    // Check if all questions in current section are answered
+    const currentQuestions = document.querySelectorAll(`#section-${currentSection} input[type="radio"]`);
+    const questionGroups = {};
+
+    // Group questions by name
+    currentQuestions.forEach(question => {
+        if (!questionGroups[question.name]) {
+            questionGroups[question.name] = [];
+        }
+        questionGroups[question.name].push(question);
+    });
+
+    // Check if any group has no checked option
+    let allAnswered = true;
+    for (const group in questionGroups) {
+        if (!questionGroups[group].some(q => q.checked)) {
+            allAnswered = false;
+            break;
+        }
+    }
+
+    if (!allAnswered) {
+        alert('Please answer all questions in this section before proceeding.');
+        return;
+    }
+
+    // Hide current section
+    document.getElementById(`section-${currentSection}`).classList.remove('active');
+
+    // Update progress bar to 100%
+    document.getElementById('progress').style.width = '100%';
+
+    // Show results section
+    document.getElementById('results').style.display = 'block';
+
+    // Calculate scores for each section
+    const sectionScores = [
+        { name: 'Firewalls', score: calculateSectionScore(1) },
+        { name: 'Secure Configuration', score: calculateSectionScore(2) },
+        { name: 'Security Update Management', score: calculateSectionScore(3) },
+        { name: 'User Access Control', score: calculateSectionScore(4) },
+        { name: 'Malware Protection', score: calculateSectionScore(5) }
+    ];
+
+    // Calculate overall score
+    const overallScore = sectionScores.reduce((total, section) => total + section.score, 0) / sectionScores.length;
+
+    // Populate summary table
+    const summaryBody = document.getElementById('summary-body');
+    summaryBody.innerHTML = '';
+
+    sectionScores.forEach(section => {
+        const status = calculateComplianceStatus(section.score);
+        const statusClass = status === 'Compliant' ? 'status-compliant' : 
+                           status === 'Partially Compliant' ? 'status-partial' : 'status-non-compliant';
+
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${section.name}</td>
+            <td><span class="status-indicator ${statusClass}"></span>${status}</td>
+            <td>${section.score.toFixed(1)}%</td>
+        `;
+        summaryBody.appendChild(row);
+    });
+
+    // Add overall row
+    const overallStatus = calculateComplianceStatus(overallScore);
+    const overallStatusClass = overallStatus === 'Compliant' ? 'status-compliant' : 
+                              overallStatus === 'Partially Compliant' ? 'status-partial' : 'status-non-compliant';
+
+    const overallRow = document.createElement('tr');
+    overallRow.style.fontWeight = 'bold';
+    overallRow.innerHTML = `
+        <td>Overall</td>
+        <td><span class="status-indicator ${overallStatusClass}"></span>${overallStatus}</td>
+        <td>${overallScore.toFixed(1)}%</td>
+    `;
+    summaryBody.appendChild(overallRow);
+
+    // Determine risk level based on overall score
+    const likelihood = overallScore >= 90 ? 1 : overallScore >= 70 ? 2 : overallScore >= 50 ? 3 : overallScore >= 30 ? 4 : 5;
+    const impact = 3; // Default impact level (moderate)
+
+    // Highlight the risk cell
+    const riskScore = likelihood * impact;
+    document.getElementById(`cell-${likelihood}-${impact}`).style.border = '3px solid black';
+
+    // Generate detailed results
+    generateDetailedResults();
+
+    // Generate recommendations
+    generateRecommendations();
+}
+
+// Generate detailed analysis of each section
+function generateDetailedResults() {
+    const detailedResults = document.getElementById('detailed-results');
+    detailedResults.innerHTML = '';
+
+    const sections = [
+        { id: 1, name: 'Firewalls' },
+        { id: 2, name: 'Secure Configuration' },
+        { id: 3, name: 'Security Update Management' },
+        { id: 4, name: 'User Access Control' },
+        { id: 5, name: 'Malware Protection' }
+    ];
+
+    sections.forEach(section => {
+        const sectionDiv = document.createElement('div');
+        sectionDiv.classList.add('results-section');
+
+        const sectionHeader = document.createElement('h4');
+        sectionHeader.textContent = section.name;
+        sectionDiv.appendChild(sectionHeader);
+
+        const sectionQuestions = document.querySelectorAll(`#section-${section.id} .question`);
+
+        sectionQuestions.forEach(questionElem => {
+            const questionText = questionElem.querySelector('label').textContent;
+            const answer = questionElem.querySelector('input[type="radio"]:checked');
+
+            if (!answer) return;
+
+            const answerValue = answer.value;
+            let statusClass = '';
+            let statusText = '';
+
+            if (answerValue === 'yes') {
+                statusClass = 'status-compliant';
+                statusText = 'Compliant';
+            } else if (answerValue === 'partial') {
+                statusClass = 'status-partial';
+                statusText = 'Partially Compliant';
+            } else if (answerValue === 'no') {
+                statusClass = 'status-non-compliant';
+                statusText = 'Non-Compliant';
+            } else if (answerValue === 'na') {
+                statusClass = '';
+                statusText = 'Not Applicable';
+            }
+
+            const questionResult = document.createElement('div');
+            questionResult.classList.add('question');
+            questionResult.innerHTML = `
+                <p><strong>${questionText}</strong></p>
+                <p><span class="status-indicator ${statusClass}"></span>${statusText}</p>
+            `;
+
+            sectionDiv.appendChild(questionResult);
+        });
+
+        detailedResults.appendChild(sectionDiv);
+    });
+}
+
+// Generate recommendations based on non-compliant areas
+function generateRecommendations() {
+    const recommendationsDiv = document.getElementById('recommendations');
+    recommendationsDiv.innerHTML = '';
+
+    // Define recommendations for each question
+    const allRecommendations = {
+        q1_1: 'Implement firewalls for all devices in scope, including next-generation firewalls for network perimeters and software firewalls for individual devices.',
+        q1_2: 'Change all default administrative passwords to unique, strong passwords following your password policy.',
+        q1_3: 'Disable remote administrative access from the internet or implement strong protections including MFA and IP allow listing.',
+        q1_4: 'Configure firewalls to block all inbound connections by default and document all approved exceptions with business justification.',
+        q1_5: 'Enable software firewalls on all devices, especially those that connect to untrusted networks like public WiFi.',
+
+        q2_1: 'Implement a process to regularly review and remove unnecessary user accounts, including guest accounts and unused administrative accounts.',
+        q2_2: 'Change all default or easily guessable passwords on all accounts and devices.',
+        q2_3: 'Remove or disable unused software, system utilities, and network services to reduce attack surface.',
+        q2_4: 'Disable auto-run features on all systems to prevent unauthorized file execution.',
+        q2_5: 'Implement appropriate device locking controls (password, PIN, or biometric) for all applicable devices.',
+
+        q3_1: 'Ensure all software is licensed and supported by the vendor.',
+        q3_2: 'Remove or isolate unsupported software from internet access.',
+        q3_3: 'Configure automatic updates for all software where possible.',
+        q3_4: 'Implement a process to apply high-risk or critical security updates within 14 days of release.',
+        q3_5: 'Implement manual configuration changes within 14 days to fix vulnerabilities where patches are unavailable.',
+
+        q4_1: 'Establish a formal process for creating and approving user accounts.',
+        q4_2: 'Ensure all users are authenticated with unique credentials before accessing applications or devices.',
+        q4_3: 'Implement processes to promptly remove or disable user accounts when no longer required.',
+        q4_4: 'Enable multi-factor authentication for all cloud services and administrative access where available.',
+        q4_5: 'Create separate accounts for administrative activities with no standard user activities performed on these accounts.',
+        q4_6: 'Enforce password policies that meet minimum technical requirements (8+ characters with MFA, 12+ without MFA) with no maximum length restrictions.',
+
+        q5_1: 'Deploy malware protection on all devices within scope.',
+        q5_2: 'Configure anti-malware software to update automatically in line with vendor recommendations.',
+        q5_3: 'Configure anti-malware solutions to prevent malware execution and malicious code running.',
+        q5_4: 'Enable web filtering to prevent connections to known malicious websites.',
+        q5_5: 'If using application allow listing, implement a formal approval process and maintain current approved application lists.'
+    };
+
+    // Find non-compliant or partially compliant questions
+    let hasRecommendations = false;
+
+    for (const [questionId, recommendation] of Object.entries(allRecommendations)) {
+        const radioButton = document.querySelector(`input[name="${questionId}"]:checked`);
+
+        if (radioButton && (radioButton.value === 'no' || radioButton.value === 'partial')) {
+            const questionText = document.querySelector(`input[name="${questionId}"]`).closest('.question').querySelector('label').textContent;
+
+            const recommendationElem = document.createElement('div');
+            recommendationElem.classList.add('recommendation');
+            recommendationElem.innerHTML = `
+                <p><strong>${questionText}</strong></p>
+                <p>${recommendation}</p>
+            `;
+
+            recommendationsDiv.appendChild(recommendationElem);
+            hasRecommendations = true;
+        }
+    }
+
+    if (!hasRecommendations) {
+        recommendationsDiv.innerHTML = '<p>Great job! Your organization appears to be meeting most of the Cyber Essentials requirements. Continue to monitor and maintain your security controls.</p>';
+    }
+}
+
+// Reset the quiz
+function resetQuiz() {
+    // Clear all selected radio buttons
+    document.querySelectorAll('input[type="radio"]:checked').forEach(radio => {
+        radio.checked = false;
+    });
+
+    // Hide results section
+    document.getElementById('results').style.display = 'none';
+
+    // Show first section
+    document.querySelectorAll('.section').forEach(section => {
+        section.classList.remove('active');
+    });
+    document.getElementById('section-1').classList.add('active');
+
+    // Reset progress bar
+    document.getElementById('progress').style.width = '0%';
+
+    // Reset current section
+    currentSection = 1;
+}
+
+// Initialize progress bar
+updateProgress();
