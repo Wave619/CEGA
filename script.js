@@ -482,9 +482,15 @@ function getSectorSpecificAdvice(questionId, sector) {
 // Load organization context form
 function loadOrgContextForm() {
     const orgContextForm = document.getElementById('org-context-form');
-    const isAssessmentPage = window.location.pathname.includes('assessment.html');
+    const isAssessmentPage = window.location.pathname.endsWith('assessment.html');
     
     if (orgContextForm) {
+        // Show organization context section and hide others
+        document.querySelectorAll('.section').forEach(section => {
+            section.classList.remove('active');
+        });
+        document.getElementById('org-context').classList.add('active');
+        
         orgContextForm.addEventListener('submit', function(event) {
             event.preventDefault();
             
