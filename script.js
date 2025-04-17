@@ -480,21 +480,31 @@ function getSectorSpecificAdvice(questionId, sector) {
 // Load organization context form
 function loadOrgContextForm() {
     const orgContextForm = document.getElementById('org-context-form');
-    orgContextForm.addEventListener('submit', function(event) {
-        event.preventDefault();
+    if (orgContextForm) {
+        orgContextForm.addEventListener('submit', function(event) {
+            event.preventDefault();
 
-        organizationContext.sector = document.getElementById('org_sector').value;
-        organizationContext.sizeCategory = document.getElementById('org_size').value;
-        organizationContext.impactLevel = parseInt(document.getElementById('org_impact').value, 10);
+            organizationContext.sector = document.getElementById('org_sector').value;
+            organizationContext.sizeCategory = document.getElementById('org_size').value;
+            organizationContext.impactLevel = parseInt(document.getElementById('org_impact').value, 10);
 
-        // Hide organization context section and show first section
-        document.getElementById('org-context').classList.remove('active');
-        document.getElementById('section-1').classList.add('active');
+            // Store context in sessionStorage
+            sessionStorage.setItem('organizationContext', JSON.stringify(organizationContext));
+            
+            // Redirect to assessment page
+            window.location.href = 'assessment.html';
+        });
+    }
 
-        // Update current section and progress
-        currentSection = 1;
-        updateProgress();
-    });
+    // If we're on the assessment page, load the context
+    if (window.location.pathname.includes('assessment.html')) {
+        const storedContext = sessionStorage.getItem('organizationContext');
+        if (storedContext) {
+            organizationContext = JSON.parse(storedContext);
+        } else {
+            window.location.href = 'index.html';
+        }
+    }
 }
 
 // Reset the quiz
