@@ -480,30 +480,33 @@ function getSectorSpecificAdvice(questionId, sector) {
 // Load organization context form
 function loadOrgContextForm() {
     const orgContextForm = document.getElementById('org-context-form');
+    const isAssessmentPage = window.location.pathname.includes('assessment.html');
+    
     if (orgContextForm) {
         orgContextForm.addEventListener('submit', function(event) {
             event.preventDefault();
-
-            organizationContext.sector = document.getElementById('org_sector').value;
-            organizationContext.sizeCategory = document.getElementById('org_size').value;
-            organizationContext.impactLevel = parseInt(document.getElementById('org_impact').value, 10);
-
-            // Store context in sessionStorage
-            sessionStorage.setItem('organizationContext', JSON.stringify(organizationContext));
             
-            // Redirect to assessment page
+            const sector = document.getElementById('org_sector').value;
+            const size = document.getElementById('org_size').value;
+            const impact = parseInt(document.getElementById('org_impact').value, 10);
+            
+            organizationContext = {
+                sector: sector,
+                sizeCategory: size,
+                impactLevel: impact
+            };
+            
+            sessionStorage.setItem('organizationContext', JSON.stringify(organizationContext));
             window.location.href = 'assessment.html';
         });
-    }
-
-    // If we're on the assessment page, load the context
-    if (window.location.pathname.includes('assessment.html')) {
+    } else if (isAssessmentPage) {
         const storedContext = sessionStorage.getItem('organizationContext');
-        if (storedContext) {
-            organizationContext = JSON.parse(storedContext);
-        } else {
+        if (!storedContext) {
             window.location.href = 'index.html';
+            return;
         }
+        organizationContext = JSON.parse(storedContext);
+        document.getElementById('section-1').classList.add('active');
     }
 }
 
