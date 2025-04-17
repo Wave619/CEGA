@@ -65,22 +65,35 @@ function prevSection(sectionNum) {
 function calculateSectionScore(sectionNum) {
     const questions = document.querySelectorAll(`#section-${sectionNum} input[type="radio"]:checked`);
     let scoreTotal = 0;
-    let scoreCount = 0;
+    let weightTotal = 0;
+
+    // Define weights for critical questions
+    const questionWeights = {
+        'q1_1': 2, // Boundary firewalls
+        'q1_3': 2, // Administrative access restriction
+        'q2_2': 3, // Default password changes
+        'q3_4': 2, // Critical updates
+        'q4_2': 3, // User authentication
+        'q4_4': 2, // Multi-factor authentication
+        'q5_1': 2, // Malware protection
+        'q5_3': 2  // Malware execution prevention
+    };
 
     questions.forEach(question => {
         if (question.value === 'na') return; // Skip N/A answers
 
-        if (question.value === 'yes') {
-            scoreTotal += 1;
-        } else if (question.value === 'partial') {
-            scoreTotal += 0.5;
-        } // 'no' scores 0
+        const weight = questionWeights[question.name] || 1;
+        weightTotal += weight;
 
-        scoreCount++;
+        if (question.value === 'yes') {
+            scoreTotal += weight;
+        } else if (question.value === 'partial') {
+            scoreTotal += (weight * 0.5);
+        } // 'no' scores 0
     });
 
     // Return percentage score if there are answered questions, otherwise 0
-    return scoreCount > 0 ? (scoreTotal / scoreCount) * 100 : 0;
+    return weightTotal > 0 ? (scoreTotal / weightTotal) * 100 : 0;
 }
 
 // Calculate overall compliance and determine risk level
