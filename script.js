@@ -536,9 +536,16 @@ function loadOrgContextForm() {
             return;
         }
         organizationContext = JSON.parse(storedContext);
+        currentSection = 1;
         document.getElementById('section-1').classList.add('active');
+        updateProgress();
     }
 }
+
+// Initialize when DOM is loaded
+document.addEventListener('DOMContentLoaded', function() {
+    loadOrgContextForm();
+});
 
 // Reset the quiz
 function resetQuiz() {
