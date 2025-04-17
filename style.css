@@ -95,6 +95,14 @@ input[type="radio"] {
     margin-top: 20px;
 }
 
+select {
+    width: 100%;
+    padding: 8px;
+    margin-top: 5px;
+    border: 1px solid var(--medium-gray);
+    border-radius: 4px;
+}
+
 button {
     padding: 10px 20px;
     background-color: var(--primary-color);

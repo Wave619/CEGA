@@ -1,0 +1,758 @@
+// Define total number of sections
+const totalSections = 5;
+let currentSection = 1;
+let organizationContext = {
+    sector: 'general',
+    sizeCategory: 'medium',
+    impactLevel: 3 // Default impact level (1-5)
+};
+
+// Update progress bar
+function updateProgress() {
+    const progressPercent = ((currentSection - 1) / totalSections) * 100;
+    document.getElementById('progress').style.width = progressPercent + '%';
+}
+
+// Load organization context form
+function loadOrgContextForm() {
+    // Create organization context section
+    const contextSection = document.createElement('div');
+    contextSection.id = 'org-context';
+    contextSection.classList.add('section', 'active');
+    contextSection.innerHTML = `
+        <h2>Organization Context</h2>
+        <p>Please provide information about your organization to help tailor the assessment:</p>
+        
+        <div class="question">
+            <label for="org_sector">Industry Sector:</label>
+            <select id="org_sector" class="form-control">
+                <option value="general">General Business</option>
+                <option value="healthcare">Healthcare</option>
+                <option value="finance">Financial Services</option>
+                <option value="education">Education</option>
+                <option value="government">Government</option>
+                <option value="critical">Critical Infrastructure</option>
+            </select>
+        </div>
+        
+        <div class="question">
+            <label for="org_size">Organization Size:</label>
+            <select id="org_size" class="form-control">
+                <option value="micro">Micro (1-9 employees)</option>
+                <option value="small">Small (10-49 employees)</option>
+                <option value="medium" selected>Medium (50-249 employees)</option>
+                <option value="large">Large (250+ employees)</option>
+            </select>
+        </div>
+        
+        <div class="question">
+            <label for="org_impact">Potential Impact Level of Security Breach:</label>
+            <select id="org_impact" class="form-control">
+                <option value="1">1 - Very Low Impact</option>
+                <option value="2">2 - Low Impact</option>
+                <option value="3" selected>3 - Moderate Impact</option>
+                <option value="4">4 - High Impact</option>
+                <option value="5">5 - Severe Impact</option>
+            </select>
+            <p class="help-text">Consider the impact on your organization if security controls fail (data breach, service disruption, etc.)</p>
+        </div>
+        
+        <div class="buttons">
+            <button onclick="saveOrgContext()">Next</button>
+        </div>
+    `;
+    
+    document.querySelector('.container').insertBefore(contextSection, document.getElementById('section-1'));
+    
+    // Hide the first question section
+    document.getElementById('section-1').classList.remove('active');
+}
+
+// Save organization context and proceed
+function saveOrgContext() {
+    organizationContext = {
+        sector: document.getElementById('org_sector').value,
+        sizeCategory: document.getElementById('org_size').value,
+        impactLevel: parseInt(document.getElementById('org_impact').value)
+    };
+    
+    // Hide context section
+    document.getElementById('org-context').classList.remove('active');
+    
+    // Show first question section
+    document.getElementById('section-1').classList.add('active');
+    currentSection = 1;
+    
+    // Update progress
+    updateProgress();
+}
+
+// Navigate to next section
+function nextSection(sectionNum) {
+    // Check if all questions in current section are answered
+    const currentQuestions = document.querySelectorAll(`#section-${sectionNum} input[type="radio"]`);
+    const questionGroups = {};
+
+    // Group questions by name
+    currentQuestions.forEach(question => {
+        if (!questionGroups[question.name]) {
+            questionGroups[question.name] = [];
+        }
+        questionGroups[question.name].push(question);
+    });
+
+    // Check if any group has no checked option
+    let allAnswered = true;
+    for (const group in questionGroups) {
+        if (!questionGroups[group].some(q => q.checked)) {
+            allAnswered = false;
+            break;
+        }
+    }
+
+    if (!allAnswered) {
+        alert('Please answer all questions in this section before proceeding.');
+        return;
+    }
+
+    // Hide current section
+    document.getElementById(`section-${sectionNum}`).classList.remove('active');
+
+    // Show next section
+    currentSection = sectionNum + 1;
+    document.getElementById(`section-${currentSection}`).classList.add('active');
+
+    // Update progress
+    updateProgress();
+}
+
+// Navigate to previous section
+function prevSection(sectionNum) {
+    // Hide current section
+    document.getElementById(`section-${sectionNum}`).classList.remove('active');
+
+    // Show previous section
+    currentSection = sectionNum - 1;
+    document.getElementById(`section-${currentSection}`).classList.add('active');
+
+    // Update progress
+    updateProgress();
+}
+
+// Calculate section score
+function calculateSectionScore(sectionNum) {
+    const questions = document.querySelectorAll(`#section-${sectionNum} input[type="radio"]:checked`);
+    let scoreTotal = 0;
+    let weightTotal = 0;
+    let criticalFailures = [];
+
+    // Define weights for questions based on sector
+    const baseWeights = {
+        'q1_1': 2, // Boundary firewalls
+        'q1_3': 2, // Administrative access restriction
+        'q2_2': 3, // Default password changes
+        'q3_4': 2, // Critical updates
+        'q4_2': 3, // User authentication
+        'q4_4': 2, // Multi-factor authentication
+        'q5_1': 2, // Malware protection
+        'q5_3': 2  // Malware execution prevention
+    };
+    
+    // Define sector-specific weight adjustments
+    const sectorWeightModifiers = {
+        'healthcare': {
+            'q4_2': 4, // Increased importance of user authentication in healthcare
+            'q4_4': 3, // Increased importance of MFA in healthcare
+            'q5_1': 3  // Increased importance of malware protection in healthcare
+        },
+        'finance': {
+            'q1_1': 3, // Increased importance of boundary firewalls in finance
+            'q1_3': 3, // Increased importance of admin access restriction in finance
+            'q4_4': 3  // Increased importance of MFA in finance
+        },
+        'government': {
+            'q1_3': 3, // Increased importance of admin access restriction in government
+            'q2_2': 4, // Increased importance of password security in government
+            'q4_4': 3  // Increased importance of MFA in government
+        },
+        'critical': {
+            'q1_1': 3, // Increased importance of boundary firewalls in critical infrastructure
+            'q1_3': 3, // Increased importance of admin access restriction in critical infrastructure
+            'q2_2': 4, // Increased importance of password security in critical infrastructure
+            'q3_4': 3, // Increased importance of critical updates in critical infrastructure
+            'q4_2': 4, // Increased importance of user authentication in critical infrastructure
+            'q4_4': 3, // Increased importance of MFA in critical infrastructure
+            'q5_1': 3, // Increased importance of malware protection in critical infrastructure
+            'q5_3': 3  // Increased importance of malware execution prevention in critical infrastructure
+        }
+    };
+    
+    // Define critical failure questions (automatic fail if "no")
+    const criticalQuestions = {
+        'finance': ['q1_1', 'q2_2', 'q4_2', 'q4_4'],
+        'healthcare': ['q2_2', 'q4_2', 'q5_1'],
+        'government': ['q1_3', 'q2_2', 'q4_2'],
+        'critical': ['q1_1', 'q1_3', 'q2_2', 'q3_4', 'q4_2', 'q4_4', 'q5_1']
+    };
+    
+    // Get the appropriate question weights based on sector
+    const questionWeights = {...baseWeights};
+    if (sectorWeightModifiers[organizationContext.sector]) {
+        Object.assign(questionWeights, sectorWeightModifiers[organizationContext.sector]);
+    }
+
+    // Check for critical failures
+    const sectorCriticalQuestions = criticalQuestions[organizationContext.sector] || [];
+    
+    questions.forEach(question => {
+        if (question.value === 'na') return; // Skip N/A answers
+
+        const weight = questionWeights[question.name] || 1;
+        weightTotal += weight;
+
+        // Check for critical failures
+        if (sectorCriticalQuestions.includes(question.name) && question.value === 'no') {
+            const questionLabel = question.closest('.question').querySelector('label').textContent;
+            criticalFailures.push({
+                question: question.name,
+                text: questionLabel
+            });
+        }
+
+        if (question.value === 'yes') {
+            scoreTotal += weight;
+        } else if (question.value === 'partial') {
+            scoreTotal += (weight * 0.5);
+        } // 'no' scores 0
+    });
+
+    // Return score and critical failures
+    return {
+        score: weightTotal > 0 ? (scoreTotal / weightTotal) * 100 : 0,
+        criticalFailures: criticalFailures
+    };
+}
+
+// Analyze control interdependencies to find dangerous combinations
+function analyzeControlInterdependencies() {
+    const dangerousCombinations = [
+        {
+            name: "Authentication and Firewall Weakness",
+            conditions: [
+                { name: "q1_1", value: "no" },  // No boundary firewalls
+                { name: "q4_2", value: "no" }   // No user authentication
+            ],
+            description: "Lack of boundary firewalls combined with weak authentication creates a severe security risk."
+        },
+        {
+            name: "Outdated Systems with No Malware Protection",
+            conditions: [
+                { name: "q3_4", value: "no" },  // Updates not applied
+                { name: "q5_1", value: "no" }   // No malware protection
+            ],
+            description: "Running outdated systems without malware protection significantly increases vulnerability to attacks."
+        },
+        {
+            name: "Default Credentials with Internet Access",
+            conditions: [
+                { name: "q1_3", value: "no" },  // Admin access not restricted
+                { name: "q2_2", value: "no" }   // Default passwords not changed
+            ],
+            description: "Unchanged default passwords with unrestricted administrative access creates critical exposure."
+        },
+        {
+            name: "Unrestricted Access with No Updates",
+            conditions: [
+                { name: "q4_6", value: "no" },  // Weak password policies
+                { name: "q3_3", value: "no" }   // No automatic updates
+            ],
+            description: "Weak password policies combined with lack of automatic updates increases vulnerability to known exploits."
+        }
+    ];
+    
+    const foundCombinations = [];
+    
+    dangerousCombinations.forEach(combination => {
+        let allConditionsMet = true;
+        
+        for (const condition of combination.conditions) {
+            const radio = document.querySelector(`input[name="${condition.name}"][value="${condition.value}"]:checked`);
+            if (!radio) {
+                allConditionsMet = false;
+                break;
+            }
+        }
+        
+        if (allConditionsMet) {
+            foundCombinations.push(combination);
+        }
+    });
+    
+    return foundCombinations;
+}
+
+// Calculate overall compliance and determine risk level
+function calculateComplianceStatus(score, hasCriticalFailures) {
+    if (hasCriticalFailures) {
+        return 'Non-Compliant (Critical Control Failure)';
+    } else if (score >= 90) {
+        return 'Compliant';
+    } else if (score >= 70) {
+        return 'Partially Compliant';
+    } else {
+        return 'Non-Compliant';
+    }
+}
+
+// Show results after completing the assessment
+function showResults() {
+    // Check if all questions in current section are answered
+    const currentQuestions = document.querySelectorAll(`#section-${currentSection} input[type="radio"]`);
+    const questionGroups = {};
+
+    // Group questions by name
+    currentQuestions.forEach(question => {
+        if (!questionGroups[question.name]) {
+            questionGroups[question.name] = [];
+        }
+        questionGroups[question.name].push(question);
+    });
+
+    // Check if any group has no checked option
+    let allAnswered = true;
+    for (const group in questionGroups) {
+        if (!questionGroups[group].some(q => q.checked)) {
+            allAnswered = false;
+            break;
+        }
+    }
+
+    if (!allAnswered) {
+        alert('Please answer all questions in this section before proceeding.');
+        return;
+    }
+
+    // Hide current section
+    document.getElementById(`section-${currentSection}`).classList.remove('active');
+
+    // Update progress bar to 100%
+    document.getElementById('progress').style.width = '100%';
+
+    // Show results section
+    document.getElementById('results').style.display = 'block';
+
+    // Calculate scores for each section
+    const sectionResults = [
+        { name: 'Firewalls', ...calculateSectionScore(1) },
+        { name: 'Secure Configuration', ...calculateSectionScore(2) },
+        { name: 'Security Update Management', ...calculateSectionScore(3) },
+        { name: 'User Access Control', ...calculateSectionScore(4) },
+        { name: 'Malware Protection', ...calculateSectionScore(5) }
+    ];
+
+    // Check for critical failures across all sections
+    const allCriticalFailures = sectionResults.flatMap(section => section.criticalFailures);
+    const hasCriticalFailures = allCriticalFailures.length > 0;
+
+    // Calculate overall score
+    const overallScore = sectionResults.reduce((total, section) => total + section.score, 0) / sectionResults.length;
+
+    // Analyze dangerous control combinations
+    const dangerousCombinations = analyzeControlInterdependencies();
+
+    // Populate summary table
+    const summaryBody = document.getElementById('summary-body');
+    summaryBody.innerHTML = '';
+
+    sectionResults.forEach(section => {
+        const status = calculateComplianceStatus(section.score, section.criticalFailures.length > 0);
+        const statusClass = status.includes('Compliant') && !status.includes('Non') ? 'status-compliant' : 
+                           status.includes('Partially') ? 'status-partial' : 'status-non-compliant';
+
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${section.name}</td>
+            <td><span class="status-indicator ${statusClass}"></span>${status}</td>
+            <td>${section.score.toFixed(1)}%</td>
+        `;
+        summaryBody.appendChild(row);
+    });
+
+    // Add overall row
+    const overallStatus = calculateComplianceStatus(overallScore, hasCriticalFailures);
+    const overallStatusClass = overallStatus.includes('Compliant') && !overallStatus.includes('Non') ? 'status-compliant' : 
+                              overallStatus.includes('Partially') ? 'status-partial' : 'status-non-compliant';
+
+    const overallRow = document.createElement('tr');
+    overallRow.style.fontWeight = 'bold';
+    overallRow.innerHTML = `
+        <td>Overall</td>
+        <td><span class="status-indicator ${overallStatusClass}"></span>${overallStatus}</td>
+        <td>${overallScore.toFixed(1)}%</td>
+    `;
+    summaryBody.appendChild(overallRow);
+
+    // Determine risk level based on overall score and critical failures
+    let likelihood;
+    if (hasCriticalFailures) {
+        likelihood = 5; // Highest likelihood if critical failures exist
+    } else {
+        likelihood = overallScore >= 90 ? 1 : 
+                    overallScore >= 75 ? 2 : 
+                    overallScore >= 60 ? 3 : 
+                    overallScore >= 40 ? 4 : 5;
+    }
+    
+    // Use the organization's selected impact level
+    const impact = organizationContext.impactLevel;
+
+    // Highlight the risk cell
+    const riskScore = likelihood * impact;
+    document.getElementById(`cell-${likelihood}-${impact}`).style.border = '3px solid black';
+    
+    // Add impact and likelihood labels
+    document.getElementById('impact-level').textContent = `${impact} - ${getImpactDescription(impact)}`;
+    document.getElementById('likelihood-level').textContent = `${likelihood} - ${getLikelihoodDescription(likelihood)}`;
+    document.getElementById('risk-score').textContent = riskScore;
+    document.getElementById('risk-level').textContent = getRiskLevelDescription(riskScore);
+    document.getElementById('risk-level').className = getRiskLevelClass(riskScore);
+
+    // Generate detailed results
+    generateDetailedResults();
+
+    // Generate recommendations
+    generateRecommendations(sectionResults, allCriticalFailures, dangerousCombinations);
+    
+    // Generate gap analysis visualization
+    generateGapAnalysis(sectionResults);
+}
+
+// Get the text description for impact levels
+function getImpactDescription(level) {
+    const descriptions = [
+        "Very Low", "Low", "Moderate", "High", "Severe"
+    ];
+    return descriptions[level - 1];
+}
+
+// Get the text description for likelihood levels
+function getLikelihoodDescription(level) {
+    const descriptions = [
+        "Very Unlikely", "Unlikely", "Possible", "Likely", "Very Likely"
+    ];
+    return descriptions[level - 1];
+}
+
+// Get risk level description
+function getRiskLevelDescription(score) {
+    if (score >= 20) return "Critical";
+    if (score >= 12) return "High";
+    if (score >= 5) return "Medium";
+    return "Low";
+}
+
+// Get risk level CSS class
+function getRiskLevelClass(score) {
+    if (score >= 20) return "risk-level-critical";
+    if (score >= 12) return "risk-level-high";
+    if (score >= 5) return "risk-level-medium";
+    return "risk-level-low";
+}
+
+// Generate detailed analysis of each section
+function generateDetailedResults() {
+    const detailedResults = document.getElementById('detailed-results');
+    detailedResults.innerHTML = '';
+
+    const sections = [
+        { id: 1, name: 'Firewalls' },
+        { id: 2, name: 'Secure Configuration' },
+        { id: 3, name: 'Security Update Management' },
+        { id: 4, name: 'User Access Control' },
+        { id: 5, name: 'Malware Protection' }
+    ];
+
+    sections.forEach(section => {
+        const sectionDiv = document.createElement('div');
+        sectionDiv.classList.add('results-section');
+
+        const sectionHeader = document.createElement('h4');
+        sectionHeader.textContent = section.name;
+        sectionDiv.appendChild(sectionHeader);
+
+        const sectionQuestions = document.querySelectorAll(`#section-${section.id} .question`);
+
+        sectionQuestions.forEach(questionElem => {
+            const questionText = questionElem.querySelector('label').textContent;
+            const answer = questionElem.querySelector('input[type="radio"]:checked');
+
+            if (!answer) return;
+
+            const answerValue = answer.value;
+            let statusClass = '';
+            let statusText = '';
+
+            if (answerValue === 'yes') {
+                statusClass = 'status-compliant';
+                statusText = 'Compliant';
+            } else if (answerValue === 'partial') {
+                statusClass = 'status-partial';
+                statusText = 'Partially Compliant';
+            } else if (answerValue === 'no') {
+                statusClass = 'status-non-compliant';
+                statusText = 'Non-Compliant';
+            } else if (answerValue === 'na') {
+                statusClass = '';
+                statusText = 'Not Applicable';
+            }
+
+            // Check if this is a critical control for the selected sector
+            const isCriticalControl = isCriticalQuestion(answer.name);
+            
+            const questionResult = document.createElement('div');
+            questionResult.classList.add('question');
+            if (isCriticalControl && answerValue === 'no') {
+                questionResult.classList.add('critical-failure');
+            }
+            
+            questionResult.innerHTML = `
+                <p>
+                    <strong>${questionText}</strong>
+                    ${isCriticalControl ? '<span class="critical-marker">CRITICAL</span>' : ''}
+                </p>
+                <p><span class="status-indicator ${statusClass}"></span>${statusText}</p>
+            `;
+
+            sectionDiv.appendChild(questionResult);
+        });
+
+        detailedResults.appendChild(sectionDiv);
+    });
+}
+
+// Check if a question is critical for the current sector
+function isCriticalQuestion(questionName) {
+    const criticalQuestions = {
+        'finance': ['q1_1', 'q2_2', 'q4_2', 'q4_4'],
+        'healthcare': ['q2_2', 'q4_2', 'q5_1'],
+        'government': ['q1_3', 'q2_2', 'q4_2'],
+        'critical': ['q1_1', 'q1_3', 'q2_2', 'q3_4', 'q4_2', 'q4_4', 'q5_1']
+    };
+    
+    const sectorCriticalQuestions = criticalQuestions[organizationContext.sector] || [];
+    return sectorCriticalQuestions.includes(questionName);
+}
+
+// Generate gap analysis visualization
+function generateGapAnalysis(sectionResults) {
+    const gapAnalysisDiv = document.getElementById('gap-analysis');
+    gapAnalysisDiv.innerHTML = `
+        <h3>Gap Analysis</h3>
+        <div class="gap-chart-container">
+            <canvas id="gap-chart"></canvas>
+        </div>
+    `;
+    
+    // Prepare data for chart
+    const labels = sectionResults.map(section => section.name);
+    const scores = sectionResults.map(section => section.score);
+    const gaps = sectionResults.map(section => 100 - section.score);
+    
+    // Create chart
+    const ctx = document.getElementById('gap-chart').getContext('2d');
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [
+                {
+                    label: 'Current Score',
+                    data: scores,
+                    backgroundColor: '#28a745',
+                    order: 2
+                },
+                {
+                    label: 'Gap to Full Compliance',
+                    data: gaps,
+                    backgroundColor: '#dc3545',
+                    order: 1
+                }
+            ]
+        },
+        options: {
+            scales: {
+                x: {
+                    stacked: true
+                },
+                y: {
+                    stacked: true,
+                    min: 0,
+                    max: 100,
+                    title: {
+                        display: true,
+                        text: 'Percentage'
+                    }
+                }
+            },
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Compliance Gap Analysis by Control Area'
+                },
+                tooltip: {
+                    callbacks: {
+                        label: function(context) {
+                            return `${context.dataset.label}: ${context.raw.toFixed(1)}%`;
+                        }
+                    }
+                }
+            },
+            responsive: true,
+            maintainAspectRatio: false
+        }
+    });
+}
+
+// Generate recommendations based on non-compliant areas
+function generateRecommendations(sectionResults, criticalFailures, dangerousCombinations) {
+    const recommendationsDiv = document.getElementById('recommendations');
+    recommendationsDiv.innerHTML = '';
+
+    // Define recommendations for each question
+    const allRecommendations = {
+        q1_1: 'Implement firewalls for all devices in scope, including next-generation firewalls for network perimeters and software firewalls for individual devices.',
+        q1_2: 'Change all default administrative passwords to unique, strong passwords following your password policy.',
+        q1_3: 'Disable remote administrative access from the internet or implement strong protections including MFA and IP allow listing.',
+        q1_4: 'Configure firewalls to block all inbound connections by default and document all approved exceptions with business justification.',
+        q1_5: 'Enable software firewalls on all devices, especially those that connect to untrusted networks like public WiFi.',
+        q2_1: 'Implement a process to regularly review and remove unnecessary user accounts, including guest accounts and unused administrative accounts.',
+        q2_2: 'Change all default or easily guessable passwords on all accounts and devices.',
+        q2_3: 'Remove or disable unused software, system utilities, and network services to reduce attack surface.',
+        q2_4: 'Disable auto-run features on all systems to prevent unauthorized file execution.',
+        q2_5: 'Implement appropriate device locking controls (password, PIN, or biometric) for all applicable devices.',
+        q3_1: 'Ensure all software is licensed and supported by the vendor.',
+        q3_2: 'Remove or isolate unsupported software from internet access.',
+        q3_3: 'Configure automatic updates for all software where possible.',
+        q3_4: 'Implement a process to apply high-risk or critical security updates within 14 days of release.',
+        q3_5: 'Implement manual configuration changes within 14 days to fix vulnerabilities where patches are unavailable.',
+        q4_1: 'Establish a formal process for creating and approving user accounts.',
+        q4_2: 'Ensure all users are authenticated with unique credentials before accessing applications or devices.',
+        q4_3: 'Implement processes to promptly remove or disable user accounts when no longer required.',
+        q4_4: 'Enable multi-factor authentication for all cloud services and administrative access where available.',
+        q4_5: 'Create separate accounts for administrative activities with no standard user activities performed on these accounts.',
+        q4_6: 'Enforce password policies that meet minimum technical requirements (8+ characters with MFA, 12+ without MFA) with no maximum length restrictions.',
+        q5_1: 'Deploy malware protection on all devices within scope.',
+        q5_2: 'Configure anti-malware software to update automatically in line with vendor recommendations.',
+        q5_3: 'Configure anti-malware solutions to prevent malware execution and malicious code running.',
+        q5_4: 'Enable web filtering to prevent connections to known malicious websites.',
+        q5_5: 'If using application allow listing, implement a formal approval process and maintain current approved application lists.'
+    };
+
+    // Highlight critical failures first
+    if (criticalFailures.length > 0) {
+        const criticalDiv = document.createElement('div');
+        criticalDiv.classList.add('critical-recommendations');
+        criticalDiv.innerHTML = `
+            <h4>Critical Control Failures (Address Immediately)</h4>
+            <div class="alert alert-danger">
+                <p>The following critical security controls require immediate attention:</p>
+            </div>
+        `;
+        
+        const criticalList = document.createElement('ul');
+        criticalDiv.querySelector('.alert').appendChild(criticalList);
+        
+        criticalFailures.forEach(failure => {
+            const item = document.createElement('li');
+            item.innerHTML = `
+                <strong>${failure.text}</strong>
+                <p>${allRecommendations[failure.question]}</p>
+            `;
+            criticalList.appendChild(item);
+        });
+        
+        recommendationsDiv.appendChild(criticalDiv);
+    }
+    
+    // Highlight dangerous combinations
+    if (dangerousCombinations.length > 0) {
+        const combinationsDiv = document.createElement('div');
+        combinationsDiv.classList.add('combinations-recommendations');
+        combinationsDiv.innerHTML = `
+            <h4>Dangerous Control Combinations</h4>
+            <div class="alert alert-warning">
+                <p>The following combinations of control weaknesses create significant security risks:</p>
+            </div>
+        `;
+        
+        const combinationsList = document.createElement('ul');
+        combinationsDiv.querySelector('.alert').appendChild(combinationsList);
+        
+        dangerousCombinations.forEach(combination => {
+            const item = document.createElement('li');
+            item.innerHTML = `
+                <strong>${combination.name}</strong>
+                <p>${combination.description}</p>
+            `;
+            combinationsList.appendChild(item);
+        });
+        
+        recommendationsDiv.appendChild(combinationsDiv);
+    }
+
+    // Add general recommendations
+    const generalRecommendationsDiv = document.createElement('div');
+    generalRecommendationsDiv.classList.add('general-recommendations');
+    generalRecommendationsDiv.innerHTML = '<h4>General Recommendations</h4>';
+    recommendationsDiv.appendChild(generalRecommendationsDiv);
+
+    // Find non-compliant or partially compliant questions
+    let hasRecommendations = false;
+
+    for (const [questionId, recommendation] of Object.entries(allRecommendations)) {
+        const radioButton = document.querySelector(`input[name="${questionId}"]:checked`);
+
+        if (radioButton && (radioButton.value === 'no' || radioButton.value === 'partial') && 
+            !criticalFailures.some(failure => failure.question === questionId)) {
+            
+            const questionText = document.querySelector(`input[name="${questionId}"]`).closest('.question').querySelector('label').textContent;
+
+            const recommendationElem = document.createElement('div');
+            recommendationElem.classList.add('recommendation');
+            
+            // Add sector-specific advice if available
+            const sectorSpecific = getSectorSpecificAdvice(questionId, organizationContext.sector);
+            
+            recommendationElem.innerHTML = `
+                <p><strong>${questionText}</strong></p>
+                <p>${recommendation}</p>
+                ${sectorSpecific ? `<p class="sector-specific"><strong>For ${organizationContext.sector} organizations:</strong> ${sectorSpecific}</p>` : ''}
+            `;
+
+            generalRecommendationsDiv.appendChild(recommendationElem);
+            hasRecommendations = true;
+        }
+    }
+
+    if (!hasRecommendations && criticalFailures.length === 0 && dangerousCombinations.length === 0) {
+        generalRecommendationsDiv.innerHTML += '<p>Great job! Your organization appears to be meeting most of the Cyber Essentials requirements. Continue to monitor and maintain your security controls.</p>';
+    }
+    
+    // Add prioritized action plan
+    generateActionPlan(sectionResults, criticalFailures, dangerousCombinations);
+}
+
+// Generate prioritized action plan
+function generateActionPlan(sectionResults, criticalFailures, dangerousCombinations) {
+    const actionPlanDiv = document.createElement('div');
+    actionPlanDiv.classList.add('action-plan');
+    actionPlanDiv.innerHTML = '<h3>Prioritized Action Plan</h3>';
+    
+    // Collect all issues that need addressing
+    const allIssues = [];
+    
+    // Add critical failures first (highest priority)
+    criticalFailures.forEach(failure => {
+        allIssues.push({
+            priority: 1,
+            type: 'Critical
