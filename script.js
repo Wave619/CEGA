@@ -1,3 +1,33 @@
+// Define recommendations for each question
+const allRecommendations = {
+    q1_1: 'Implement firewalls for all devices in scope, including next-generation firewalls for network perimeters and software firewalls for individual devices.',
+    q1_2: 'Change all default administrative passwords to unique, strong passwords following your password policy.',
+    q1_3: 'Disable remote administrative access from the internet or implement strong protections including MFA and IP allow listing.',
+    q1_4: 'Configure firewalls to block all inbound connections by default and document all approved exceptions with business justification.',
+    q1_5: 'Enable software firewalls on all devices, especially those that connect to untrusted networks like public WiFi.',
+    q2_1: 'Implement a process to regularly review and remove unnecessary user accounts, including guest accounts and unused administrative accounts.',
+    q2_2: 'Change all default or easily guessable passwords on all accounts and devices.',
+    q2_3: 'Remove or disable unused software, system utilities, and network services to reduce attack surface.',
+    q2_4: 'Disable auto-run features on all systems to prevent unauthorized file execution.',
+    q2_5: 'Implement appropriate device locking controls (password, PIN, or biometric) for all applicable devices.',
+    q3_1: 'Ensure all software is licensed and supported by the vendor.',
+    q3_2: 'Remove or isolate unsupported software from internet access.',
+    q3_3: 'Configure automatic updates for all software where possible.',
+    q3_4: 'Implement a process to apply high-risk or critical security updates within 14 days of release.',
+    q3_5: 'Implement manual configuration changes within 14 days to fix vulnerabilities where patches are unavailable.',
+    q4_1: 'Establish a formal process for creating and approving user accounts.',
+    q4_2: 'Ensure all users are authenticated with unique credentials before accessing applications or devices.',
+    q4_3: 'Implement processes to promptly remove or disable user accounts when no longer required.',
+    q4_4: 'Enable multi-factor authentication for all cloud services and administrative access where available.',
+    q4_5: 'Create separate accounts for administrative activities with no standard user activities performed on these accounts.',
+    q4_6: 'Enforce password policies that meet minimum technical requirements (8+ characters with MFA, 12+ without MFA) with no maximum length restrictions.',
+    q5_1: 'Deploy malware protection on all devices within scope.',
+    q5_2: 'Configure anti-malware software to update automatically in line with vendor recommendations.',
+    q5_3: 'Configure anti-malware solutions to prevent malware execution and malicious code running.',
+    q5_4: 'Enable web filtering to prevent connections to known malicious websites.',
+    q5_5: 'If using application allow listing, implement a formal approval process and maintain current approved application lists.'
+};
+
 // Define total number of sections
 const totalSections = 5;
 let currentSection = 1;
